@@ -35,11 +35,11 @@
 
     <ImageView
         android:id="@+id/ivLowVolume"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_centerInParent="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_launcher_background"
-        android:tint="@color/colorAccent" />
+        android:src="@drawable/down_graph"
+        android:visibility="gone" />
 
 </LinearLayout>

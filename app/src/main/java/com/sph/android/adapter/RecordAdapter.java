@@ -7,20 +7,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sph.android.R;
+import com.sph.android.adapter.models.AdapterRecord;
 import com.sph.android.model.rest.Record;
 
 import java.util.List;
 
 public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordViewHolder> {
 
-    private List<Record> records;
+    private List<AdapterRecord> records;
     private int rowLayout;
     private Context context;
 
 
-    public RecordAdapter(List<Record> records, int rowLayout, Context context) {
+    public RecordAdapter(List<AdapterRecord> records, int rowLayout, Context context) {
         this.records = records;
         this.rowLayout = rowLayout;
         this.context = context;
@@ -37,6 +39,16 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordView
     public void onBindViewHolder(RecordViewHolder holder, final int position) {
         holder.tvQuarter.setText(records.get(position).getQuarter());
         holder.tvVolume.setText(records.get(position).getVolumeOfMobileData());
+        if(records.get(position).isShowImage()){
+            holder.ivLowVolume.setVisibility(View.VISIBLE);
+
+            holder.ivLowVolume.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(context,"cliecked", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     @Override
