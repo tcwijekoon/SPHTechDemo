@@ -40,24 +40,40 @@ public class MainActivity extends AppCompatActivity {
         double totalDataVol = prevDataVolume;
         boolean showImage = false;
         List<RecordDb> newRecords = new ArrayList<>();
-        for (int i = 1; i < records.size(); i++) {
-            if (prevYear.equalsIgnoreCase(records.get(i).getQuarter().trim().substring(0, 4))) {
-                if (prevDataVolume > Double.parseDouble(records.get(i).getVolumeOfMobileData())) {
-                    showImage = true;
-                }
-                totalDataVol += Double.parseDouble(records.get(i).getVolumeOfMobileData());
-                prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
-            } else {
-                RecordDb rec = new RecordDb();
-                rec.setYear(prevYear);
-                rec.setVolumeOfMobileData(Double.toString(totalDataVol));
-                rec.setShowImage(showImage);
-                newRecords.add(rec);
+        if(records.size() == 1){
+            RecordDb rec = new RecordDb();
+            rec.setYear(prevYear);
+            rec.setVolumeOfMobileData(Double.toString(totalDataVol));
+            rec.setShowImage(showImage);
+            newRecords.add(rec);
+        }else {
+            for (int i = 1; i < records.size(); i++) {
+                if (prevYear.equalsIgnoreCase(records.get(i).getQuarter().trim().substring(0, 4))) {
+                    if (prevDataVolume > Double.parseDouble(records.get(i).getVolumeOfMobileData())) {
+                        showImage = true;
+                    }
+                    totalDataVol += Double.parseDouble(records.get(i).getVolumeOfMobileData());
+                    prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
+                } else {
+                    RecordDb rec = new RecordDb();
+                    rec.setYear(prevYear);
+                    rec.setVolumeOfMobileData(Double.toString(totalDataVol));
+                    rec.setShowImage(showImage);
+                    newRecords.add(rec);
 
-                showImage = false;
-                prevYear = records.get(i).getQuarter().trim().substring(0, 4);
-                prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
-                totalDataVol = prevDataVolume;
+                    showImage = false;
+                    prevYear = records.get(i).getQuarter().trim().substring(0, 4);
+                    prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
+                    totalDataVol = prevDataVolume;
+                    //check last record is new year and has only one quarter
+                    if(i+1 == records.size()){
+                        RecordDb rec2 = new RecordDb();
+                        rec2.setYear(prevYear);
+                        rec2.setVolumeOfMobileData(Double.toString(totalDataVol));
+                        rec2.setShowImage(showImage);
+                        newRecords.add(rec2);
+                    }
+                }
             }
         }
         return newRecords;
@@ -87,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
 
-        Call<DataResponse> call = apiService.getRecords(API_KEY, 250);
+        Call<DataResponse> call = apiService.getRecords(API_KEY, 500);
         call.enqueue(new Callback<DataResponse>() {
             @Override
             public void onResponse(Call<DataResponse> call, Response<DataResponse> response) {
