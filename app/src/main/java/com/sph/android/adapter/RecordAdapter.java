@@ -10,19 +10,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sph.android.R;
-import com.sph.android.adapter.models.AdapterRecord;
-import com.sph.android.model.rest.Record;
+import com.sph.android.model.db.data.RecordDb;
 
 import java.util.List;
 
 public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordViewHolder> {
 
-    private List<AdapterRecord> records;
+    private List<RecordDb> records;
     private int rowLayout;
     private Context context;
 
-
-    public RecordAdapter(List<AdapterRecord> records, int rowLayout, Context context) {
+    public RecordAdapter(List<RecordDb> records, int rowLayout, Context context) {
         this.records = records;
         this.rowLayout = rowLayout;
         this.context = context;
@@ -37,15 +35,15 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordView
 
     @Override
     public void onBindViewHolder(RecordViewHolder holder, final int position) {
-        holder.tvQuarter.setText(records.get(position).getQuarter());
-        holder.tvVolume.setText(records.get(position).getVolumeOfMobileData());
-        if(records.get(position).isShowImage()){
+        holder.tvQuarter.setText("Year : " + records.get(position).getYear());
+        holder.tvVolume.setText("Data Volume : " + records.get(position).getVolumeOfMobileData().toString());
+        if (records.get(position).isShowImage()) {
             holder.ivLowVolume.setVisibility(View.VISIBLE);
 
             holder.ivLowVolume.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(context,"cliecked", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "cliecked", Toast.LENGTH_SHORT).show();
                 }
             });
         }

@@ -1,8 +1,13 @@
-package com.sph.android.adapter.models;
+package com.sph.android.model.db.data;
 
-public class AdapterRecord {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class RecordDb extends RealmObject {
+
+    @PrimaryKey
     private String volumeOfMobileData;
-    private String quarter;
+    private String year;
     private boolean showImage;
 
     public String getVolumeOfMobileData() {
@@ -13,12 +18,12 @@ public class AdapterRecord {
         this.volumeOfMobileData = volumeOfMobileData;
     }
 
-    public String getQuarter() {
-        return quarter;
+    public String getYear() {
+        return year;
     }
 
-    public void setQuarter(String quarter) {
-        this.quarter = quarter;
+    public void setYear(String year) {
+        this.year = year;
     }
 
     public boolean isShowImage() {
