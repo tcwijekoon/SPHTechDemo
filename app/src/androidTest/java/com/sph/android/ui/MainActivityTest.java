@@ -16,6 +16,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -122,5 +123,10 @@ public class MainActivityTest {
                                 1),
                         isDisplayed()));
         appCompatImageView.perform(click());
+    }
+
+    @Test
+    public void checkConnectivity(){
+        Assert.assertTrue(MainActivity.isNetworkConnected(mActivityTestRule.getActivity()));
     }
 }

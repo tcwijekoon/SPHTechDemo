@@ -1,14 +1,11 @@
 package com.sph.android.ui;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.sph.android.R;
@@ -30,7 +27,6 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
     private final static String API_KEY = "a807b7ab-6cad-4aa6-87d0-e283a7353a0f";
     private RecyclerView recyclerView;
 
@@ -40,41 +36,42 @@ public class MainActivity extends AppCompatActivity {
         double totalDataVol = prevDataVolume;
         boolean showImage = false;
         List<RecordDb> newRecords = new ArrayList<>();
-        if(records.size() == 1){
+
+        for (int i = 1; i < records.size(); i++) {
+            if (prevYear.equalsIgnoreCase(records.get(i).getQuarter().trim().substring(0, 4))) {
+                if (prevDataVolume > Double.parseDouble(records.get(i).getVolumeOfMobileData())) {
+                    showImage = true;
+                }
+                totalDataVol += Double.parseDouble(records.get(i).getVolumeOfMobileData());
+                prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
+            } else {
+                RecordDb rec = new RecordDb();
+                rec.setYear(prevYear);
+                rec.setVolumeOfMobileData(Double.toString(totalDataVol));
+                rec.setShowImage(showImage);
+                newRecords.add(rec);
+
+                showImage = false;
+                prevYear = records.get(i).getQuarter().trim().substring(0, 4);
+                prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
+                totalDataVol = prevDataVolume;
+                //check last record is new year and has only one quarter
+                if (i + 1 == records.size()) {
+                    RecordDb rec2 = new RecordDb();
+                    rec2.setYear(prevYear);
+                    rec2.setVolumeOfMobileData(Double.toString(totalDataVol));
+                    rec2.setShowImage(showImage);
+                    newRecords.add(rec2);
+                }
+            }
+        }
+        //only single year records presents
+        if (records.size() > 0 && newRecords.size() == 0) {
             RecordDb rec = new RecordDb();
             rec.setYear(prevYear);
             rec.setVolumeOfMobileData(Double.toString(totalDataVol));
             rec.setShowImage(showImage);
             newRecords.add(rec);
-        }else {
-            for (int i = 1; i < records.size(); i++) {
-                if (prevYear.equalsIgnoreCase(records.get(i).getQuarter().trim().substring(0, 4))) {
-                    if (prevDataVolume > Double.parseDouble(records.get(i).getVolumeOfMobileData())) {
-                        showImage = true;
-                    }
-                    totalDataVol += Double.parseDouble(records.get(i).getVolumeOfMobileData());
-                    prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
-                } else {
-                    RecordDb rec = new RecordDb();
-                    rec.setYear(prevYear);
-                    rec.setVolumeOfMobileData(Double.toString(totalDataVol));
-                    rec.setShowImage(showImage);
-                    newRecords.add(rec);
-
-                    showImage = false;
-                    prevYear = records.get(i).getQuarter().trim().substring(0, 4);
-                    prevDataVolume = Double.parseDouble(records.get(i).getVolumeOfMobileData());
-                    totalDataVol = prevDataVolume;
-                    //check last record is new year and has only one quarter
-                    if(i+1 == records.size()){
-                        RecordDb rec2 = new RecordDb();
-                        rec2.setYear(prevYear);
-                        rec2.setVolumeOfMobileData(Double.toString(totalDataVol));
-                        rec2.setShowImage(showImage);
-                        newRecords.add(rec2);
-                    }
-                }
-            }
         }
         return newRecords;
     }
@@ -90,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rvMobileData);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        if (!isNetworkConnected()) {
+        if (!isNetworkConnected(this)) {
             loadList();
             Toast.makeText(this, "No Internet connection. data load from the db", Toast.LENGTH_LONG).show();
         } else {
@@ -108,16 +105,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<DataResponse> call, Response<DataResponse> response) {
                 int statusCode = response.code();
-                List<Record> records = response.body().getResult().getRecords();
-                List<RecordDb> newRecords = getAdapterRecords(records);
-                saveAdapterRecords(newRecords);
-                loadList();
+                if (statusCode == 200) {
+                    List<Record> records = response.body().getResult().getRecords();
+                    List<RecordDb> newRecords = getAdapterRecords(records);
+                    saveAdapterRecords(newRecords);
+                    loadList();
+                } else {
+                    Toast.makeText(MainActivity.this, "Server connection failed.", Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
             public void onFailure(Call<DataResponse> call, Throwable t) {
                 // Log error here since request failed
-                Log.e(TAG, t.toString());
+                Toast.makeText(MainActivity.this, "Server connection failed." + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -137,8 +138,8 @@ public class MainActivity extends AppCompatActivity {
         RealmManager.close();
     }
 
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    public static boolean isNetworkConnected(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
     }
 
